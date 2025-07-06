@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tic Tac Toe AI</title>
+        <link rel="stylesheet" href="styles.css">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <style>
+
+        .dim-border-10r {
+            border: 6px solid;
+            border-left-width: 3px;
+            border-top-width: 3px;
+            border-radius: 10px;
+        }
+
+        .dim-border-7r {
+            border: 6px solid;
+            border-left-width: 3px;
+            border-top-width: 3px;
+            border-radius: 7px;
+        }
+
+        .hoverAnim  {
+            transition-duration: 150ms;
+        }
+
+        .clickAnim  {
+            transition-duration: 150ms;
+        }
+
+        .clickAnim:active   {
+            scale: 85%;
+        }
+        </style>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #2a2a2a;
+                margin: 0;
+                padding: 20px;
+            }
+            #headBar {
+                border: 5px solid #d0d0d0;
+                color: #65bfff;
+                padding: 10px;
+                text-align: center;
+            }
+            #info {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 10px;
+            }
+            #controls {
+                margin-top: 10px;
+                display: flex;
+                justify-content: center;
+            }
+            button {
+                padding: 10px 15px;
+                margin: 5px;
+                background-color: #2a2a2a;
+                width: 150px;
+                font: bolder 18px Arial, sans-serif;
+            }
+
+            #resetGame{
+                border-color: #4fd99b;
+                color: #4fd99b;
+            }
+
+            #resetAI{
+                border-color: #4fd99b;
+                color: #4fd99b;
+            }
+
+            #info div {
+                border-color: #8df9e6;
+                padding: 5px;
+                color: #8df9e6;
+                align-items: center;
+                display: flex;
+                justify-content: center;
+                font: bolder 25px Arial, sans-serif;
+                height: 50px;
+                width: 100%;
+            }
+
+            #controls div {
+                border-color: #e3f98d;
+                padding: 5px;
+                color: #e3f98d;
+                align-items: center;
+                display: flex;
+                justify-content: center;
+                font: bolder 25px Arial, sans-serif;
+                height: 50px;
+                width: 25%;
+            }
+            #game {
+                text-align: center;
+                color: #d0d0d0;
+                margin-top: 20px;
+            }
+            #tictactoeWrapper {
+                position: relative;
+                width: 310px;      
+                height: 310px;     
+                margin: 20px auto; 
+                display: block;
+            }
+            #strikeLine {
+                position: absolute;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                z-index: 2;
+            }
+            #tictactoe {
+                display: grid;
+                grid-template-columns: repeat(3, 100px);
+                grid-template-rows: repeat(3, 100px);
+                gap: 5px;
+            }
+            .row {
+                display: contents;
+            }
+
+            .cell {
+                width: 100px;
+                height: 100px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 36px;
+                border: 1px solid #d0d0d0;
+                cursor: pointer;
+            }
+
+            .cell:hover {
+                background-color: #3a3a3a;
+            }
+
+            .graph-wrapper {
+                display: flex;
+                justify-content: center;
+                margin-top: 20px;
+            }
+            .graph-container {
+                width: 600px;
+                height: 400px;
+                background-color: #2a2a2a;
+                border: 1px solid #d0d0d0;
+                padding: 20px;
+                border-radius: 10px;
+            }
+
+            .graph-container h2 {
+                color: #d0d0d0;
+                text-align: center;
+            }
+            canvas {
+                width: 100%;
+                height: 100%;
+            }
+
+            
+            #back {
+                position: sticky;
+                bottom: 10px;
+                left: 10px;
+                background-color: #4fd99b;
+                animation: slideIn 1s ease-in-out;
+            }
+
+            #back:hover {
+                background-color: #3a9f7a;
+            }
+
+            #autoplayBoard {
+                background-color: #242424;
+                border: none;
+                padding: 20px;
+                border-radius: 10px;
+                color: #8df9e6;
+            }
+        </style>
+        <style>
+            @keyframes slideIn {
+                from {
+                    transform: translateX(-200%);
+                }
+                to {
+                    transform: translateX(0);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="headBar">
+            <h1>MENACE</h1>
+            <p>Play against an AI that learns the more it plays</p>
+            <div id="info">
+                <div class="dim-border-10r">Won: <span id="won">0</span></div>
+                <div class="dim-border-10r">Drawn: <span id="draws">0</span></div>
+                <div class="dim-border-10r">Lost: <span id="losses">0</span></div>
+            </div>
+            <div id="controls">
+                <div class="dim-border-10r">Games Played: <span id="gamesPlayed">0</span></div>
+                <button id="resetGame" class="dim-border-7r hoverAnim clickAnim">Reset Game</button>
+                <button id="autoPlay" class="dim-border-7r hoverAnim clickAnim" style="border-color: aliceblue; color: aliceblue;">Auto-Play 100 Games</button>
+                <button id="resetAI" class="dim-border-7r hoverAnim clickAnim">Reset AI</button>
+                <div class="dim-border-10r">Current Turn: <span id="currentTurn" name="currentTurn">O</span></div>
+            </div>
+        </div>
+        <div id="game">
+            <p>Result: <span id="result">None</span></p>
+            <p>You are playing as: <span id="playerSymbol">X</span></p>
+            <div id="tictactoeWrapper">
+                <div id="tictactoe">
+                    <div class="row">
+                        <div class="cell" data-index="0"></div>
+                        <div class="cell" data-index="1"></div>
+                        <div class="cell" data-index="2"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" data-index="3"></div>
+                        <div class="cell" data-index="4"></div>
+                        <div class="cell" data-index="5"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" data-index="6"></div>
+                        <div class="cell" data-index="7"></div>
+                        <div class="cell" data-index="8"></div>
+                    </div>
+                </div>
+    <p style="display: none;" name="result" id="result"></p>
+    <p style="display: none;" name="boardState" id="boardState">[0,0,0,0,0,0,0,0,0]</p>
+    <p style="display: none;" name="moveNumber" id="moveNumber">0</p>
+    <svg id="strikeLine" width="310" height="310" style="position:absolute; pointer-events:none; left:0; top:0; z-index:2; display:none;">
+        <line id="strike" x1="0" y1="0" x2="0" y2="0" stroke="#e3f98d" stroke-width="8" stroke-linecap="round"/>
+    </svg>
+            </div>
+        </div>
+    <div style="text-align:center; margin-top:20px;">
+    <label for="speedSlider" style="color:#8df9e6;">Auto-Play Speed:</label>
+    <input type="range" id="speedSlider" min="10" max="1000" value="100" step="10">
+    <span id="speedValue" style="color:#8df9e6;">100 ms</span>
+</div>
+<div id="autoplayBoard" style="margin:20px auto; width:310px; display:none;">
+    <h3 style="color:#4fd99b;">Auto-Play Game Viewer</h3>
+    <div id="autoplayTicTacToe" style="pointer-events:none;"></div>
+    <div id="autoplayStatus" style="color:#8df9e6; margin-top:10px;"></div>
+</div>
+    <div class="graph-wrapper">
+        <div class="graph-container">
+            <h2>AI Learning Graph</h2>
+            <canvas id="learningGraph" width="600" height="300"></canvas>
+        </div>
+    </div>
+    <a href="http://localhost:8080/AiGames.html">
+        <button id="back" class="dim-border-7r hoverAnim clickAnim">Back to Menu</button>
+    </a>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </body>
+    <script>
+    let performance = 0;    
+    const cells = document.querySelectorAll('.cell');
+    let currentPlayer = 'O'; // AI starts first
+    document.getElementById('currentTurn').textContent = currentPlayer;
+    let board = Array(9).fill(0);
+function syncBoardFromDOM() {
+    cells.forEach((cell, idx) => {
+        if (cell.innerHTML.includes('line')) {
+            board[idx] = -1;
+        } else if (cell.innerHTML.includes('circle')) {
+            board[idx] = 1;
+        } else {
+            board[idx] = 0;
+        }
+    });
+}
+    function drawX() {
+        return `
+            <svg width="60" height="60">
+                <line x1="10" y1="10" x2="50" y2="50" stroke="#4fd99b" stroke-width="6" stroke-linecap="round"/>
+                <line x1="50" y1="10" x2="10" y2="50" stroke="#4fd99b" stroke-width="6" stroke-linecap="round"/>
+            </svg>
+        `;
+    }
+
+    function drawO() {
+        return `
+            <svg width="60" height="60">
+                <circle cx="30" cy="30" r="20" stroke="#8df9e6" stroke-width="6" fill="none"/>
+            </svg>
+        `;
+    }
+    function readBoardState()   {
+        const Board = [];
+        cells.forEach((cell, idx) => {
+            if (cell.innerHTML.includes('line')) {
+                Board[idx] = -1; // X
+            } else if (cell.innerHTML.includes('circle')) {
+                Board[idx] = 1; // O
+            } else if (cell.innerHTML === '') {
+                Board[idx] = 0; // Empty cell
+            }
+        
+        });
+        document.getElementById('boardState').textContent = JSON.stringify(Board);
+    };
+
+    function readMoveNumber() {
+        const moveNumber = document.getElementById('moveNumber').textContent;
+        return parseInt(moveNumber, 10);
+    }
+    function updateMoveNumber() {
+        const moveNumber = readMoveNumber() + 1;
+        document.getElementById('moveNumber').textContent = moveNumber;
+    }
+cells.forEach((cell, idx) => {
+    cell.addEventListener('click', () => {
+        if (!cell.innerHTML && board[idx] === 0 && currentPlayer === 'X') {
+   cell.innerHTML = drawX();
+board[idx] = -1;
+syncBoardFromDOM(); // <-- Add this line
+checkGameStatus();
+currentPlayer = 'O';
+document.getElementById('currentTurn').textContent = currentPlayer;
+readBoardState();
+updateMoveNumber();
+if (document.getElementById('result').textContent === 'None') {
+    setTimeout(aiMove, 300);
+}
+}
+    });
+});
+
+document.getElementById('resetGame').addEventListener('click', () => {
+    cells.forEach(cell => {
+        cell.innerHTML = '';
+    });
+    board = Array(9).fill(0);
+    syncBoardFromDOM();
+    readBoardState();
+    currentPlayer = 'O';
+    document.getElementById('currentTurn').textContent = currentPlayer;
+    document.getElementById('result').textContent = 'None';
+    document.getElementById('moveNumber').textContent = '0';
+    document.getElementById('boardState').textContent = JSON.stringify(Array(9).fill(0));
+    if (!autoPlaying) {
+        setTimeout(aiMove, 300);
+    }
+});
+
+    document.getElementById('resetAI').addEventListener('click', () => {
+        // Reset AI logic here
+    });
+
+function detectWin() {
+    const winningCombinations = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+    ];
+
+    for (const combination of winningCombinations) {
+        const [a, b, c] = combination;
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+            return { winner: board[a], combo: combination };
+        }
+    }
+    return null;
+}
+
+function drawStrikeLine(combo) {
+    // Calculate cell centers
+    const cellSize = 100;
+    const gap = 5;
+    const offset = 50; // center of cell
+    const extend = 40; // how much to extend beyond the board
+
+    // Map cell index to its center
+    const centers = [
+        [0 * (cellSize + gap) + offset, 0 * (cellSize + gap) + offset], // 0
+        [1 * (cellSize + gap) + offset, 0 * (cellSize + gap) + offset], // 1
+        [2 * (cellSize + gap) + offset, 0 * (cellSize + gap) + offset], // 2
+        [0 * (cellSize + gap) + offset, 1 * (cellSize + gap) + offset], // 3
+        [1 * (cellSize + gap) + offset, 1 * (cellSize + gap) + offset], // 4
+        [2 * (cellSize + gap) + offset, 1 * (cellSize + gap) + offset], // 5
+        [0 * (cellSize + gap) + offset, 2 * (cellSize + gap) + offset], // 6
+        [1 * (cellSize + gap) + offset, 2 * (cellSize + gap) + offset], // 7
+        [2 * (cellSize + gap) + offset, 2 * (cellSize + gap) + offset], // 8
+    ];
+
+    let [x1, y1] = centers[combo[0]];
+    let [x2, y2] = centers[combo[2]];
+
+    // Extend the line beyond the board for visual effect
+    if (combo[0] === 0 && combo[2] === 2) { // Top row
+        x1 -= extend; x2 += extend;
+    } else if (combo[0] === 6 && combo[2] === 8) { // Bottom row
+        x1 -= extend; x2 += extend;
+    } else if (combo[0] === 0 && combo[2] === 6) { // Left column
+        y1 -= extend; y2 += extend;
+    } else if (combo[0] === 2 && combo[2] === 8) { // Right column
+        y1 -= extend; y2 += extend;
+    } else if (combo[0] === 0 && combo[2] === 8) { // Diagonal \
+        x1 -= extend; y1 -= extend; x2 += extend; y2 += extend;
+    } else if (combo[0] === 2 && combo[2] === 6) { // Diagonal /
+        x1 += extend; y1 -= extend; x2 -= extend; y2 += extend;
+    } else if (combo[0] === 3 && combo[2] === 5) { // Middle row
+        x1 -= extend; x2 += extend;
+    } else if (combo[0] === 1 && combo[2] === 7) { // Middle column
+        y1 -= extend; y2 += extend;
+    }
+
+    const strikeLine = document.getElementById('strikeLine');
+    const strike = document.getElementById('strike');
+    strike.setAttribute('x1', x1);
+    strike.setAttribute('y1', y1);
+    strike.setAttribute('x2', x2);
+    strike.setAttribute('y2', y2);
+    strikeLine.style.display = 'block';
+}
+
+function hideStrikeLine() {
+    document.getElementById('strikeLine').style.display = 'none';
+}
+function updateStats(result) {
+    const gamesPlayed = parseInt(document.getElementById('gamesPlayed').textContent) + 1;
+    document.getElementById('gamesPlayed').textContent = gamesPlayed;
+
+    if (result === -1) { // X wins
+        const won = parseInt(document.getElementById('won').textContent) + 1;
+        document.getElementById('won').textContent = won;
+        document.getElementsByName('result')[0].textContent = '-1';
+        performance -= 1;
+        updateLearningGraph(gamesPlayed, performance);
+        fetch('/learn', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({result: -1})
+        });
+    } else if (result === 1) { // O wins
+        const losses = parseInt(document.getElementById('losses').textContent) + 1;
+        document.getElementById('losses').textContent = losses;
+        document.getElementsByName('result')[0].textContent = '1';
+        performance += 1;
+        updateLearningGraph(gamesPlayed, performance);
+        fetch('/learn', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({result: 1})
+        });
+    }
+
+    if (result === 'draw') {
+        const draws = parseInt(document.getElementById('draws').textContent) + 1;
+        document.getElementById('draws').textContent = draws;
+        document.getElementsByName('result')[0].textContent = '0';
+        updateLearningGraph(gamesPlayed, performance);
+        fetch('/learn', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({result: 0})
+        });
+    }
+}
+
+function checkGameStatus() {
+    const result = detectWin();
+    if (result) {
+        document.getElementById('result').textContent = `${result.winner === 1 ? 'O' : 'X'} wins!`;
+        updateStats(result.winner);
+        drawStrikeLine(result.combo);
+        setTimeout(() => {
+            document.getElementById('resetGame').click();
+            hideStrikeLine();
+        }, 500);
+    } else if (board.every(cell => cell)) {
+        document.getElementById('result').textContent = 'It\'s a draw!';
+        updateStats('draw');
+        setTimeout(() => document.getElementById('resetGame').click(), 500);
+    }
+}
+
+let aiThinking = false;
+
+function aiMove() {
+    if (aiThinking) return;
+    aiThinking = true;
+    if (currentPlayer !== 'O') { aiThinking = false; return; }
+    if (document.getElementById('result').textContent !== 'None') { aiThinking = false; return; }
+    const emptyCells = board.map((cell, index) => cell === 0 ? index : null).filter(index => index !== null);
+    if (emptyCells.length === 0) { aiThinking = false; return; }
+
+    if (document.getElementById('moveNumber').textContent === '0') {
+        document.getElementById('moveNumber').textContent = '1';
+    }
+    fetch('/play', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            currentTurn: currentPlayer,
+            boardState: JSON.parse(document.getElementById('boardState').textContent),
+            moveNumber: readMoveNumber()
+        })
+    })
+    .then(response => response.text())
+    .then(move => {
+        move = parseInt(move, 10);
+        console.log("AI move response:", move);
+        if (!isNaN(move) && board[move] === 0) {
+            cells[move].innerHTML = drawO();
+            board[move] = 1;
+            syncBoardFromDOM();
+            readBoardState();
+            checkGameStatus();
+            currentPlayer = 'X';
+            document.getElementById('currentTurn').textContent = currentPlayer;
+            updateMoveNumber();
+        } else {
+            console.error("Invalid AI move:", move, board[move]);
+        }
+        aiThinking = false;
+    })
+    .catch(() => { aiThinking = false; });
+}
+    // Automatically trigger AI move after a short delay
+window.onload = function() {
+    setTimeout(aiMove, 300);
+};
+    // setTimeout(aiMove, 300);
+
+    const ctx = document.getElementById('learningGraph').getContext('2d');
+    const learningGraph = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'AI Learning Progress',
+                data: [],
+                borderColor: '#4fd99b',
+                backgroundColor: 'rgba(79, 217, 155, 0.2)',
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Games Played'
+                    }
+                },
+                y: {
+                    suggestedMin: -10, // Start with a window around zero
+                    suggestedMax: 10,
+                    title: {
+                        display: true,
+                        text: 'Performance'
+                    },
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: function(context) {
+                            if (context.tick.value === 0) {
+                                return '#e3f98d'; // Highlight zero line
+                            }
+                            return '#444';
+                        },
+                        lineWidth: function(context) {
+                            return context.tick.value === 0 ? 3 : 1;
+                        }
+                    }
+                }
+            }
+        }
+    });
+function updateLearningGraph(gameCount, performance) {
+    learningGraph.data.labels.push(gameCount);
+    learningGraph.data.datasets[0].data.push(performance);
+
+    // Find min/max in data
+    const allData = learningGraph.data.datasets[0].data;
+    const min = Math.min(...allData, 0);
+    const max = Math.max(...allData, 0);
+
+    // Add a margin
+    learningGraph.options.scales.y.suggestedMin = min - 2;
+    learningGraph.options.scales.y.suggestedMax = max + 2;
+
+    learningGraph.update();
+}
+
+let autoPlaying = false;
+
+
+
+async function autoPlayGame(xStrategy = 'optimal', show = false, gameNum = 1) {
+    document.getElementById('resetGame').click();
+    await new Promise(r => setTimeout(r, 50)); // Wait for reset
+
+    let localBoard = Array(9).fill(0);
+    let current = 'O';
+    let gameOver = false;
+
+    if (show) {
+        renderAutoplayBoard(localBoard);
+        document.getElementById('autoplayStatus').textContent = `Game ${gameNum}`;
+        await new Promise(r => setTimeout(r, autoPlaySpeed));
+    }
+
+    while (!gameOver) {
+        if (current === 'O') {
+            let oCount = localBoard.filter(x => x === 1).length;
+            let moveNumber = 2 * oCount + 1;
+            let response = await fetch('/play', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    currentTurn: current,
+                    boardState: localBoard,
+                    moveNumber: moveNumber
+                })
+            });
+            let move = parseInt(await response.text(), 10);
+            if (!isNaN(move) && localBoard[move] === 0) {
+                localBoard[move] = 1;
+            }
+        } else {
+            let move;
+            if (xStrategy === 'random') {
+                move = findRandomXMove(localBoard);
+            } else {
+                move = findBestXMove(localBoard);
+            }
+            if (move !== null) {
+                localBoard[move] = -1;
+            }
+        }
+
+        if (show) {
+            renderAutoplayBoard(localBoard);
+            await new Promise(r => setTimeout(r, autoPlaySpeed));
+        }
+
+        let winner = checkWinner(localBoard);
+        if (winner !== 0 || localBoard.every(cell => cell !== 0)) {
+            updateStats(winner === 0 ? 'draw' : winner);
+            gameOver = true;
+            break;
+        }
+        current = (current === 'O') ? 'X' : 'O';
+    }
+}
+
+// Function to check the winner
+
+// Simple win check for auto-play
+function checkWinner(board) {
+    const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+    ];
+    for (const [a,b,c] of wins) {
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+            return board[a];
+        }
+    }
+    return 0;
+}
+
+
+// X plays optimally
+function findBestXMove(board) {
+    // 1. Win if possible
+    for (let i = 0; i < 9; i++) {
+        if (board[i] === 0) {
+            board[i] = -1;
+            if (checkWinner(board) === -1) {
+                board[i] = 0;
+                return i;
+            }
+            board[i] = 0;
+        }
+    }
+    // 2. Block O's win
+    for (let i = 0; i < 9; i++) {
+        if (board[i] === 0) {
+            board[i] = 1;
+            if (checkWinner(board) === 1) {
+                board[i] = 0;
+                return i;
+            }
+            board[i] = 0;
+        }
+    }
+    // 3. Take center
+    if (board[4] === 0) return 4;
+    // 4. Take opposite corner
+    const opposites = [[0,8],[2,6],[6,2],[8,0]];
+    for (const [a,b] of opposites) {
+        if (board[a] === 1 && board[b] === 0) return b;
+    }
+    // 5. Take any empty corner
+    const corners = [0,2,6,8].filter(i => board[i] === 0);
+    if (corners.length > 0) return corners[Math.floor(Math.random() * corners.length)];
+    // 6. Take any empty side
+    const sides = [1,3,5,7].filter(i => board[i] === 0);
+    if (sides.length > 0) return sides[Math.floor(Math.random() * sides.length)];
+    // Should never reach here
+    return null;
+}
+
+// X plays randomly
+function findRandomXMove(board) {
+    const empty = [];
+    for (let i = 0; i < 9; i++) {
+        if (board[i] === 0) {
+            empty.push(i);
+        }
+    }
+    if (empty.length > 0) {
+        return empty[Math.floor(Math.random() * empty.length)];
+    }
+    return null;
+}
+
+function renderAutoplayBoard(board) {
+    const symbols = board.map(cell => {
+        if (cell === -1) return drawX();
+        if (cell === 1) return drawO();
+        return '';
+    });
+    let html = '<div style="display:grid;grid-template-columns:repeat(3,100px);grid-template-rows:repeat(3,100px);gap:5px;">';
+    for (let i = 0; i < 9; i++) {
+        html += `<div style="width:100px;height:100px;display:flex;align-items:center;justify-content:center;border:1px solid #d0d0d0;background:#222;">${symbols[i]}</div>`;
+    }
+    html += '</div>';
+    document.getElementById('autoplayTicTacToe').innerHTML = html;
+}
+
+let autoPlaySpeed = 100; // ms
+
+document.getElementById('speedSlider').addEventListener('input', function() {
+    autoPlaySpeed = parseInt(this.value, 10);
+    document.getElementById('speedValue').textContent = `${autoPlaySpeed} ms`;
+});
+
+document.getElementById('autoPlay').addEventListener('click', async () => {
+    autoPlaying = true;
+    document.getElementById('won').textContent = 0;
+    document.getElementById('draws').textContent = 0;
+    document.getElementById('losses').textContent = 0;
+    document.getElementById('gamesPlayed').textContent = 0;
+    performance = 0;
+    learningGraph.data.labels = [];
+    learningGraph.data.datasets[0].data = [];
+    learningGraph.update();
+
+    document.getElementById('autoplayBoard').style.display = 'block';
+
+for (let i = 0; i < 200; i++) {
+    let xStrategy = 'optimal'; // Always use optimal strategy for X
+    document.getElementById('autoplayStatus').textContent = `Playing Game ${i + 1}...`;
+    await autoPlayGame(xStrategy, true, i + 1);
+}
+    document.getElementById('autoplayBoard').style.display = 'none';
+    autoPlaying = false;
+    alert('Auto-play completed!');
+});
+    </script>
+    <script>
+        // Initialize the learning graph with empty data
+        updateLearningGraph(0, 0);
+</script>
+</html>
