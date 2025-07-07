@@ -259,7 +259,7 @@
             <canvas id="learningGraph" width="600" height="300"></canvas>
         </div>
     </div>
-    <a href="http://localhost:8080/AiGames.html">
+    <a href="https://kiwigames-github-io.onrender.com/AiGames.html">
         <button id="back" class="dim-border-7r hoverAnim clickAnim">Back to Menu</button>
     </a>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -519,7 +519,6 @@ function aiMove() {
     .then(response => response.text())
     .then(move => {
         move = parseInt(move, 10);
-        console.log("AI move response:", move);
         if (!isNaN(move) && board[move] === 0) {
             cells[move].innerHTML = drawO();
             board[move] = 1;
