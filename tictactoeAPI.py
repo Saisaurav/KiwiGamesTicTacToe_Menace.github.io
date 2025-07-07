@@ -15,15 +15,11 @@ def play():
     Turn = request.json['currentTurn']
     Board = request.json['boardState']
     MoveNumber = request.json['moveNumber']
-    print("Received data:")
-    print(Board)
-    print(Turn)
-    print(MoveNumber)
+
     if Turn == 'O':
         # Convert all board elements to int!
         board_tuple = tuple(int(x) for x in Board)
         move = menace.play(MoveNumber, board_tuple)
-        print(str(move))
         return str(move)
     else:
         return "Invalid turn. Only 'O' can make a move."
@@ -33,7 +29,6 @@ def play():
 def learn():
     result = request.json['result']  # 1 for win, 0 for draw, -1 for loss
     menace.update(result)
-    print(f"Learning from result: {result}")
     return "AI updated"
 
 if __name__ == '__main__':
